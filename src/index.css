@@ -85,7 +85,7 @@ a:hover {
 
 .products {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
   list-style-type: none;
@@ -94,7 +94,7 @@ a:hover {
 }
 
 .products li {
-  flex: 0 1 29rem;
+  flex: 0 1 31rem;
   height: 47rem;
   padding: 1rem;
 }
@@ -107,8 +107,8 @@ a:hover {
 }
 
 .product img {
-  width: 29rem;
-  height: 37rem;
+  width: 31rem;
+  max-height: 37rem;
 }
 
 .product-price {
@@ -140,4 +140,17 @@ a:hover {
 
 .button.primary {
   background-color: #f0c040;
+}
+
+/* Filter */
+
+.filter {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  margin: 1rem;
+  border-bottom: 0.1rem #c0c0c0 solid;
+}
+.filter div {
+  flex: 1;
 }
