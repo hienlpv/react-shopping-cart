@@ -230,3 +230,30 @@ form {
   padding: 1rem;
   border: 0.1rem #c0c0c0 solid;
 }
+
+/* Modal Product Detail */
+.product-detail {
+  height: 82vh;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.product-detail img {
+  max-height: 100%;
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+.product-detail-description {
+  flex: 1 1;
+  margin: 1rem;
+}
+
+.close-modal {
+  position: absolute;
+  right: 1rem;
+  top: 2.5rem;
+  z-index: 1000;
+  font-size: 2rem;
+}
