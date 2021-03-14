@@ -1,4 +1,4 @@
-// Feature 1
+// Test 1
 import React from "react";
 import Cart from "./components/Cart";
 import Filter from "./components/Filter";
