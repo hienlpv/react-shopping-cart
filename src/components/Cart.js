@@ -25,7 +25,7 @@ class Cart extends Component {
       address: this.state.address,
       cartItems: this.props.cartItems,
     };
-    this.props.createOrder(order);
+    alert("Need to save for " + order.name);
   };
   render() {
     // localStorage.setItem("cartItems", []);

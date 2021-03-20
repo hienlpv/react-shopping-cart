@@ -18,21 +18,6 @@ class App extends React.Component {
     };
   }
 
-  createOrder = (order) => {
-    alert("Need to save for " + order.name);
-  };
-
-  removeFromCart = (product) => {
-    const cartItems = this.state.cartItems.slice();
-    this.setState({
-      cartItems: cartItems.filter((x) => x._id !== product._id),
-    });
-    localStorage.setItem(
-      "cartItems",
-      JSON.stringify(cartItems.filter((x) => x._id !== product._id))
-    );
-  };
-
   render() {
     return (
       <Provider store={store}>
@@ -44,13 +29,10 @@ class App extends React.Component {
             <div className="content">
               <div className="main">
                 <Filter></Filter>
-                <Products addToCart={this.addToCart}></Products>
+                <Products></Products>
               </div>
               <div className="sidebar">
-                <Cart
-                  createOrder={this.createOrder}
-                  removeFromCart={this.removeFromCart}
-                ></Cart>
+                <Cart></Cart>
               </div>
             </div>
           </main>
