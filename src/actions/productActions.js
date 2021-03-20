@@ -1,4 +1,9 @@
-import { FETCH_PRODUCTS, FILTER_PRODUCTS, SORT_PRODUCTS } from "../types";
+import {
+  ADD_PRODUCT_TO_CART,
+  FETCH_PRODUCTS,
+  FILTER_PRODUCTS,
+  SORT_PRODUCTS,
+} from "../types";
 
 export const fetchProducts = () => (dispatch) => {
   fetch("api/products")
@@ -25,6 +30,7 @@ export const filterProducts = (products, size) => (dispatch) => {
 };
 
 export const sortProducts = (products, sort) => (dispatch) => {
+  console.log(products);
   const sortedItems = products.slice();
   dispatch({
     type: SORT_PRODUCTS,
@@ -44,5 +50,12 @@ export const sortProducts = (products, sort) => (dispatch) => {
           : -1
       ),
     },
+  });
+};
+
+export const addProductToCart = (product) => (dispatch) => {
+  dispatch({
+    type: ADD_PRODUCT_TO_CART,
+    payload: product,
   });
 };

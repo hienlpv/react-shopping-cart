@@ -6,7 +6,7 @@ const shortid = require("shortid");
 const app = express();
 app.use(bodyParser.json());
 
-mongoose.connect("mongodb://localhost/react-shopping-cart-db", {
+mongoose.connect("mongodb://localhost:27017/react-shopping-cart-db", {
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true,
@@ -25,8 +25,12 @@ const Product = mongoose.model(
 );
 
 app.get("/api/products", async (reg, res) => {
-  const products = await Product.find({});
-  res.send(products);
+  try {
+    const products = await Product.find({});
+    res.send(products);
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 app.post("/api/products", async (req, res) => {
