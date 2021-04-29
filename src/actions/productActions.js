@@ -53,9 +53,21 @@ export const sortProducts = (products, sort) => (dispatch) => {
   });
 };
 
-export const addProductToCart = (product) => (dispatch) => {
+export const addProductToCart = (cartItems, product) => (dispatch) => {
+  const new_cartItems = cartItems.slice();
+  let alreadyInCart = false;
+  new_cartItems.forEach((item) => {
+    if (item._id === product._id) {
+      item.count++;
+      alreadyInCart = true;
+    }
+  });
+  if (!alreadyInCart) {
+    new_cartItems.push({ ...product, count: 1 });
+    localStorage.setItem("cartItems", JSON.stringify(new_cartItems));
+  }
   dispatch({
     type: ADD_PRODUCT_TO_CART,
-    payload: product,
+    payload: new_cartItems,
   });
 };

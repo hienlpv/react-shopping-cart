@@ -19,6 +19,7 @@ class Products extends Component {
   }
   render() {
     const { product } = this.state;
+    const { cartItems } = this.props;
     return (
       <div>
         <Fade bottom cascade>
@@ -43,7 +44,9 @@ class Products extends Component {
                         {formatCurrency(product.price)}
                       </div>
                       <button
-                        onClick={() => this.props.addProductToCart(product)}
+                        onClick={() =>
+                          this.props.addProductToCart(cartItems, product)
+                        }
                         className="button primary"
                       >
                         Add to Cart
@@ -86,7 +89,10 @@ class Products extends Component {
                     <div>{formatCurrency(product.price)}</div>
                     <button
                       className="button primary"
-                      onClick={() => this.props.addProductToCart(product)}
+                      onClick={() => {
+                        this.props.addProductToCart(cartItems, product);
+                        this.setState({ product: null });
+                      }}
                     >
                       Add to cart
                     </button>
@@ -102,7 +108,10 @@ class Products extends Component {
 }
 
 export default connect(
-  (state) => ({ products: state.products.filteredItems }),
+  (state) => ({
+    products: state.products.filteredItems,
+    cartItems: state.cart.cartItems,
+  }),
   {
     fetchProducts,
     addProductToCart,
