@@ -4,6 +4,7 @@ import TableColor from "./TableColor";
 import TableMark from "./TableMark";
 import TableProducts from "./TableProducts";
 import TableType from "./TableType";
+import TableOrder from "./TableOrder";
 
 class Table extends Component {
   render() {
@@ -16,6 +17,8 @@ class Table extends Component {
         return <TableColor></TableColor>;
       case "Type":
         return <TableType></TableType>;
+      case "Order":
+        return <TableOrder></TableOrder>;
       default:
         return <TableProducts></TableProducts>;
     }

@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+::before,
+::after {
+  box-sizing: border-box;
+}
+
 html {
   background-color: rgb(239, 239, 239);
   font-family: Roboto, Helvetica, Arial, sans-serif;
@@ -20,10 +25,11 @@ a {
 header {
   display: flex;
   background-color: rgb(1, 127, 255);
-  padding: 18px 0px 8px;
+  padding: 18px 10px 8px;
   margin-right: auto;
   margin-left: auto;
   align-items: center;
+  justify-content: space-between;
 }
 
 .title {
@@ -31,7 +37,7 @@ header {
 }
 
 .header-search {
-  flex: 1;
+  width: 60%;
   display: flex;
 }
 
@@ -66,6 +72,110 @@ header {
   width: 20px;
   height: 20px;
   margin: 0px 8px 0px 0px;
+}
+
+.header-account {
+  cursor: pointer;
+  margin: 0px 0px 0px 16px;
+  -webkit-box-align: center;
+  align-items: center;
+  display: flex;
+  color: rgb(255, 255, 255);
+  font-size: 12px;
+  position: relative;
+}
+
+.header-account img {
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  border-radius: 2px;
+}
+
+.header-account-dropdown {
+  color: rgb(255, 255, 255);
+  font-weight: 400;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-account-dropdown > span {
+  font-size: 11px;
+}
+
+.header-account:hover .header-account-dropdown-content {
+  display: block;
+}
+
+.header-account-dropdown-content {
+  display: none;
+  border: 1px solid rgb(239, 239, 239);
+  background: rgb(255, 255, 255);
+  width: auto;
+  min-width: 196px;
+  z-index: 15;
+  list-style: none;
+  margin: 0px;
+  padding: 10px 0px;
+  border-radius: 0px 0px 3px 3px;
+  box-shadow: rgb(0 0 0 / 18%) 0px 6px 12px 0px;
+  position: absolute;
+  top: 38px;
+  left: calc(50% + 10px);
+  transform: translateX(-50%);
+}
+
+.header-account-dropdown-content::before {
+  border-width: 9px;
+  border-style: solid;
+  border-color: transparent transparent rgb(255, 255, 255);
+  border-image: initial;
+  margin-left: -9px;
+  bottom: 100%;
+  left: 50%;
+  content: " ";
+  height: 0px;
+  width: 0px;
+  position: absolute;
+  pointer-events: none;
+}
+
+.header-account-dropdown-content button {
+  color: rgb(74, 74, 74);
+  background: rgb(253, 216, 53);
+  display: inline-block;
+  font-weight: 400;
+  text-align: center;
+  vertical-align: middle;
+  touch-action: manipulation;
+  cursor: pointer;
+  border: 0px;
+  white-space: nowrap;
+  padding: 0px;
+  font-size: 14px;
+  border-radius: 4px;
+  user-select: none;
+  margin: 5px 12px;
+  width: 236px;
+  height: 41px;
+  line-height: 41px;
+  outline: none;
+  text-shadow: rgb(171 171 171) 0px 0px 1px;
+}
+
+.account-label {
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  font-size: 13px;
+  line-height: 20px;
+  min-width: 120px;
+}
+
+.account-label img {
+  width: 16px;
+  height: 16px;
 }
 
 .header-cart {
@@ -107,7 +217,7 @@ header {
 
 .cart-noti {
   position: absolute;
-  bottom: -15px;
+  top: 10px;
   right: 0px;
   padding: 16px;
   transform: translateY(100%);
@@ -153,4 +263,9 @@ header {
   margin-right: 4px;
   color: rgb(76, 175, 80);
   font-size: 19px;
+}
+
+/* --------------------------------ADMIN------------------------------- */
+.modal-add-small > div > div {
+  inset: 210px 410px !important;
 }

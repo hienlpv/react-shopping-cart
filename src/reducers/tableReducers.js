@@ -12,6 +12,10 @@ import {
   EDIT_TYPE,
   DELETE_TYPE,
   FETCH_TYPE,
+  ADD_ORDER,
+  EDIT_ORDER,
+  DELETE_ORDER,
+  FETCH_ORDER,
 } from "../types";
 
 export const tableReducers = (state = {}, action) => {
@@ -42,6 +46,14 @@ export const tableReducers = (state = {}, action) => {
       return { ...state, type: action.payload };
     case EDIT_TYPE:
       return { ...state, type: action.payload };
+    case FETCH_ORDER:
+      return { ...state, order: action.payload };
+    case ADD_ORDER:
+      return { ...state, order: action.payload };
+    case DELETE_ORDER:
+      return { ...state, order: action.payload };
+    case EDIT_ORDER:
+      return { ...state, order: action.payload };
     default:
       return state;
   }

@@ -19,3 +19,7 @@ export const FETCH_TYPE = "FETCH_TYPE";
 export const ADD_TYPE = "ADD_TYPE";
 export const DELETE_TYPE = "DELETE_TYPE";
 export const EDIT_TYPE = "EDIT_TYPE";
+export const FETCH_ORDER = "FETCH_ORDER";
+export const ADD_ORDER = "ADD_ORDER";
+export const DELETE_ORDER = "DELETE_ORDER";
+export const EDIT_ORDER = "EDIT_ORDER";

@@ -58,6 +58,17 @@ class AdminControl extends Component {
           >
             <p>Màu</p>
           </ListItem>
+          <hr></hr>
+          <ListItem
+            button
+            selected={this.state.selectedIndex === 3}
+            onClick={() => {
+              this.props.chooseTable("Order");
+              this.setState({ selectedIndex: 4 });
+            }}
+          >
+            <p>Đơn hàng</p>
+          </ListItem>
         </List>
       </div>
     );

@@ -14,6 +14,10 @@ import {
   EDIT_TYPE,
   DELETE_TYPE,
   FETCH_TYPE,
+  ADD_ORDER,
+  EDIT_ORDER,
+  DELETE_ORDER,
+  FETCH_ORDER,
 } from "../types";
 import axios from "axios";
 
@@ -279,6 +283,66 @@ export const editType = (data) => async (dispatch) => {
   if (result) {
     dispatch({
       type: EDIT_TYPE,
+      payload: result,
+    });
+  }
+};
+// -----------------------TABLE ORDER-----------------------
+export const fetchOrder = () => (dispatch) => {
+  fetch("api/order")
+    .then((res) => res.json())
+    .then((res) => {
+      dispatch({
+        type: FETCH_ORDER,
+        payload: res,
+      });
+    });
+};
+
+export const addOrder = (data) => async (dispatch) => {
+  let res = await fetch("/api/order", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  let result = await res.json();
+  if (result) {
+    dispatch({
+      type: ADD_ORDER,
+      payload: result,
+    });
+  }
+};
+
+export const deleteOrder = (id) => async (dispatch) => {
+  let res = await fetch("/api/order/" + id + "", {
+    method: "Delete",
+  });
+  let result = await res.json();
+  if (result) {
+    dispatch({
+      type: DELETE_ORDER,
+      payload: result,
+    });
+  }
+};
+
+export const editOrder = (data) => async (dispatch) => {
+  let res = await fetch("/api/order/update", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  let result = await res.json();
+  if (result) {
+    dispatch({
+      type: EDIT_ORDER,
       payload: result,
     });
   }

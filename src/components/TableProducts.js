@@ -122,7 +122,6 @@ class TableProducts extends Component {
         )}
         {this.state.type === "view" && (
           <Modal isOpen="true">
-            <Zoom></Zoom>
             <button
               className="close-modal"
               onClick={() => {

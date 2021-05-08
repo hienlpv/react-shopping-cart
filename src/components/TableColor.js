@@ -77,7 +77,7 @@ class TableColor extends Component {
           />
         </div>
         {this.state.type === "add" && (
-          <Modal isOpen="true">
+          <Modal isOpen="true" portalClassName="modal-add-small">
             <Zoom>
               <button
                 className="close-modal"

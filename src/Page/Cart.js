@@ -4,6 +4,7 @@ import Fade from "react-reveal/Fade";
 import { connect } from "react-redux";
 import { addProductToCart } from "../actions/productActions";
 import { removeProductFromCart } from "../actions/cartActions";
+import { addOrder } from "../actions/tableActions";
 class Cart extends Component {
   constructor(props) {
     super(props);
@@ -11,6 +12,7 @@ class Cart extends Component {
       showCheckout: false,
       name: "",
       email: "",
+      phone: "",
       address: "",
     };
   }
@@ -18,14 +20,19 @@ class Cart extends Component {
     this.setState({ [e.target.name]: e.target.value });
   };
   createOrder = (e) => {
+    let products = [];
+    this.props.cartItems.forEach((item) => {
+      products.push(item._id);
+    });
     e.preventDefault();
     const order = {
       name: this.state.name,
       email: this.state.email,
+      phone: this.state.phone,
       address: this.state.address,
-      cartItems: this.props.cartItems,
+      products: products,
     };
-    alert("Need to save for " + order.name);
+    this.props.addOrder(order);
   };
   render() {
     // localStorage.setItem("cartItems", []);
@@ -45,7 +52,7 @@ class Cart extends Component {
               {cartItems.map((item) => (
                 <li key={item._id}>
                   <div>
-                    <img src={item.image} alt={item.title}></img>
+                    <img src={item.image[0]} alt={item.title}></img>
                   </div>
                   <div>
                     <div>{item.title}</div>
@@ -53,9 +60,14 @@ class Cart extends Component {
                       {formatCurrency(item.price)} x {item.count}{" "}
                       <button
                         className="button"
-                        onClick={() =>
-                          this.props.removeProductFromCart(cartItems, item)
-                        }
+                        onClick={async () => {
+                          await this.props.removeProductFromCart(
+                            cartItems,
+                            item
+                          );
+                          if (this.props.cartItems.length === 0)
+                            this.setState({ showCheckout: false });
+                        }}
                       >
                         Remove
                       </button>
@@ -110,6 +122,15 @@ class Cart extends Component {
                     ></input>
                   </li>
                   <li>
+                    <label>Phone</label>
+                    <input
+                      name="phone"
+                      type="text"
+                      onChange={this.handleInput}
+                      required
+                    ></input>
+                  </li>
+                  <li>
                     <label>Address</label>
                     <input
                       name="address"
@@ -137,5 +158,5 @@ export default connect(
   (state) => ({
     cartItems: state.cart.cartItems,
   }),
-  { addProductToCart, removeProductFromCart }
+  { addProductToCart, removeProductFromCart, addOrder }
 )(Cart);
