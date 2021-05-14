@@ -5,6 +5,7 @@ import TableMark from "./TableMark";
 import TableProducts from "./TableProducts";
 import TableType from "./TableType";
 import TableOrder from "./TableOrder";
+import TableAccount from "./TableAccount";
 
 class Table extends Component {
   render() {
@@ -19,6 +20,8 @@ class Table extends Component {
         return <TableType></TableType>;
       case "Order":
         return <TableOrder></TableOrder>;
+      case "Account":
+        return <TableAccount></TableAccount>;
       default:
         return <TableProducts></TableProducts>;
     }

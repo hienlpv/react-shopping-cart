@@ -8,7 +8,7 @@ import Button from "@material-ui/core/Button";
 
 class Admin extends Component {
   state = {
-    isLogin: false,
+    isLogin: true,
     username: "",
     password: "",
   };
@@ -61,12 +61,8 @@ class Admin extends Component {
             </header>
             <main>
               <div className="content">
-                <div className="sidebar">
-                  <AdminControl></AdminControl>
-                </div>
-                <div className="main">
-                  <Table></Table>
-                </div>
+                <AdminControl></AdminControl>
+                <Table></Table>
               </div>
             </main>
             <footer>All right is reserved.</footer>

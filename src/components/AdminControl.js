@@ -13,7 +13,7 @@ class AdminControl extends Component {
   }
   render() {
     return (
-      <div className="admin-control">
+      <div className="sidebar">
         <List component="nav" aria-label="main mailbox folders">
           <ListItem
             button
@@ -61,13 +61,24 @@ class AdminControl extends Component {
           <hr></hr>
           <ListItem
             button
-            selected={this.state.selectedIndex === 3}
+            selected={this.state.selectedIndex === 4}
             onClick={() => {
               this.props.chooseTable("Order");
               this.setState({ selectedIndex: 4 });
             }}
           >
             <p>Đơn hàng</p>
+          </ListItem>
+          <hr></hr>
+          <ListItem
+            button
+            selected={this.state.selectedIndex === 5}
+            onClick={() => {
+              this.props.chooseTable("Account");
+              this.setState({ selectedIndex: 5 });
+            }}
+          >
+            <p>Tài khoản</p>
           </ListItem>
         </List>
       </div>

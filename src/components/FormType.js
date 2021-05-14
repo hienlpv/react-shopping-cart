@@ -1,75 +1,124 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { addType, editType } from "../actions/tableActions";
+import { TextField, Button } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import { fetchType } from "../actions/tableActions";
 
 class FormType extends Component {
   constructor(props) {
     super(props);
     this.state = {
       typeTitle: this.props.row ? this.props.row.title : "",
-      res: false,
+      alert: null,
     };
   }
+
   handleInput = (e) => {
     this.setState({
       typeTitle: e.target.value,
     });
   };
+
+  addType = async (data) => {
+    fetch("/api/type", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        this.props.fetchType();
+        this.setState({ alert: res });
+        setTimeout(() => {
+          this.setState({ alert: null });
+        }, 1000);
+      });
+  };
+
+  editType = async (data) => {
+    fetch("/api/type/update", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        this.props.fetchType();
+        this.setState({ alert: res });
+        setTimeout(() => {
+          this.setState({ alert: null });
+        }, 1000);
+      });
+  };
+
   render() {
     switch (this.props.type) {
       case "add":
         return (
-          <div>
+          <div className="form-wrap">
             <h1>Thêm Danh mục</h1>
             <form
+              className="form-type"
               onSubmit={async (e) => {
                 e.preventDefault();
-                await this.props.addType({ title: this.state.typeTitle });
-                this.setState({ typeTitle: "", res: true });
+                await this.addType({ title: this.state.typeTitle });
+                this.setState({ typeTitle: "" });
               }}
             >
-              <label for="typeTitle">
-                Tên danh mục:
-                <input
-                  type="text"
-                  name="typeTitle"
-                  id="typeTitle"
-                  value={this.state.typeTitle}
-                  onChange={this.handleInput}
-                ></input>
-              </label>
-              <button type="submit">Thêm danh mục</button>
+              <TextField
+                label="Tên danh mục"
+                id="typeTitle"
+                name="typeTitle"
+                value={this.state.typeTitle}
+                onChange={this.handleInput}
+              />
+              <Button variant="outlined" color="primary" type="submit">
+                Thêm danh mục
+              </Button>
             </form>
-            {this.state.res && <p>SUCCESS</p>}
+            {this.state.alert && (
+              <Alert severity={this.state.alert.type}>
+                {this.state.alert.msg}
+              </Alert>
+            )}
           </div>
         );
       case "edit":
         return (
-          <div>
+          <div className="form-wrap">
             <h1>Sửa Danh mục</h1>
             <form
+              className="form-type"
               onSubmit={async (e) => {
                 e.preventDefault();
-                await this.props.editType({
+                await this.editType({
                   id: this.props.row.id,
                   title: this.state.typeTitle,
                 });
-                this.setState({ typeTitle: "", res: true });
               }}
             >
-              <label for="typeTitle">
-                Tên danh mục:
-                <input
-                  type="text"
-                  name="typeTitle"
-                  id="typeTitle"
-                  value={this.state.typeTitle}
-                  onChange={this.handleInput}
-                ></input>
-              </label>
-              <button type="submit">Sửa danh mục</button>
+              <TextField
+                label="Tên danh mục"
+                id="typeTitle"
+                name="typeTitle"
+                value={this.state.typeTitle}
+                onChange={this.handleInput}
+              />
+              <Button variant="outlined" color="primary" type="submit">
+                Sửa danh mục
+              </Button>
             </form>
-            {this.state.res && <p>SUCCESS</p>}
+            {this.state.alert && (
+              <Alert severity={this.state.alert.type}>
+                {this.state.alert.msg}
+              </Alert>
+            )}
           </div>
         );
       default:
@@ -78,7 +127,4 @@ class FormType extends Component {
   }
 }
 
-export default connect(() => ({}), {
-  addType,
-  editType,
-})(FormType);
+export default connect(() => ({}), { fetchType })(FormType);

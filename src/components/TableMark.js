@@ -1,10 +1,15 @@
 import React, { Component } from "react";
 import { DataGrid } from "@material-ui/data-grid";
-import Zoom from "react-reveal/Zoom";
 import Modal from "react-modal";
 import FormMark from "./FormMark";
 import { connect } from "react-redux";
-import { addMark, fetchMark, deleteMark } from "../actions/tableActions";
+import { fetchMark } from "../actions/tableActions";
+import { IconButton } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
+import CloseIcon from "@material-ui/icons/Close";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { Alert } from "@material-ui/lab";
 
 class TableMark extends Component {
   constructor(props) {
@@ -12,11 +17,27 @@ class TableMark extends Component {
     this.state = {
       type: "",
       row: null,
+      alert: null,
     };
   }
   componentDidMount() {
     this.props.fetchMark();
   }
+
+  deleteMark = async (id) => {
+    fetch("/api/mark/" + id + "", {
+      method: "Delete",
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.type === "success") this.props.fetchMark();
+        this.setState({ alert: res });
+        setTimeout(() => {
+          this.setState({ alert: null });
+        }, 1000);
+      });
+  };
+
   render() {
     let columns = [
       { field: "number", headerName: "STT", flex: 1 },
@@ -27,20 +48,22 @@ class TableMark extends Component {
         flex: 1,
         renderCell: (params) => (
           <div>
-            <button
+            <IconButton
+              color="primary"
               onClick={() => {
                 this.setState({ row: params.value[2], type: "edit" });
               }}
             >
-              {params.value[0]}
-            </button>
-            <button
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              color="primary"
               onClick={() => {
-                this.props.deleteMark(params.value[2].id);
+                this.deleteMark(params.value[2].id);
               }}
             >
-              {params.value[1]}
-            </button>
+              <DeleteIcon />
+            </IconButton>
           </div>
         ),
       },
@@ -57,15 +80,15 @@ class TableMark extends Component {
       });
 
     return (
-      <div>
+      <div className="table">
         <div className="table-header">
           <h1>Thương Hiệu</h1>
-          <div
-            className="tbl-btn-add"
+          <IconButton
+            color="primary"
             onClick={() => this.setState({ type: "add" })}
           >
-            <span>Thêm thương hiệu</span>
-          </div>
+            <AddIcon></AddIcon>
+          </IconButton>
         </div>
         <div style={{ width: "100%" }}>
           <DataGrid
@@ -77,34 +100,31 @@ class TableMark extends Component {
           />
         </div>
         {this.state.type === "add" && (
-          <Modal isOpen="true">
-            <Zoom>
-              <button
-                className="close-modal"
-                onClick={() => {
-                  this.setState({ type: "", row: null });
-                }}
-              >
-                x
-              </button>
-              <FormMark type="add" row={this.state.row}></FormMark>
-            </Zoom>
+          <Modal isOpen="true" portalClassName="modal modal-mark">
+            <IconButton
+              onClick={() => {
+                this.setState({ type: "", row: null });
+              }}
+            >
+              <CloseIcon color="primary"></CloseIcon>
+            </IconButton>
+            <FormMark type="add" row={this.state.row}></FormMark>
           </Modal>
         )}
         {this.state.type === "edit" && (
-          <Modal isOpen="true">
-            <Zoom>
-              <button
-                className="close-modal"
-                onClick={() => {
-                  this.setState({ type: "", row: null });
-                }}
-              >
-                x
-              </button>
-              <FormMark type="edit" row={this.state.row}></FormMark>
-            </Zoom>
+          <Modal isOpen="true" portalClassName="modal modal-mark">
+            <IconButton
+              onClick={() => {
+                this.setState({ type: "", row: null });
+              }}
+            >
+              <CloseIcon color="primary"></CloseIcon>
+            </IconButton>
+            <FormMark type="edit" row={this.state.row}></FormMark>
           </Modal>
+        )}
+        {this.state.alert && (
+          <Alert severity={this.state.alert.type}>{this.state.alert.msg}</Alert>
         )}
       </div>
     );
@@ -112,7 +132,5 @@ class TableMark extends Component {
 }
 
 export default connect((state) => ({ data: state.table.mark }), {
-  addMark,
   fetchMark,
-  deleteMark,
 })(TableMark);

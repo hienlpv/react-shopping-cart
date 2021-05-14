@@ -1,10 +1,15 @@
 import React, { Component } from "react";
 import { DataGrid } from "@material-ui/data-grid";
-import Zoom from "react-reveal/Zoom";
 import Modal from "react-modal";
 import { connect } from "react-redux";
-import { fetchType, deleteType } from "../actions/tableActions";
+import { fetchType } from "../actions/tableActions";
 import FormType from "./FormType";
+import { IconButton } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
+import CloseIcon from "@material-ui/icons/Close";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { Alert } from "@material-ui/lab";
 
 class TableType extends Component {
   constructor(props) {
@@ -12,35 +17,53 @@ class TableType extends Component {
     this.state = {
       type: "",
       row: null,
+      alert: null,
     };
   }
   componentDidMount() {
     this.props.fetchType();
   }
+
+  deleteType = async (id) => {
+    fetch("/api/type/" + id + "", {
+      method: "Delete",
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        this.props.fetchType();
+        this.setState({ alert: res });
+        setTimeout(() => {
+          this.setState({ alert: null });
+        }, 1000);
+      });
+  };
+
   render() {
     let columns = [
       { field: "number", headerName: "STT", flex: 1 },
       { field: "title", headerName: "Danh mục", flex: 1 },
       {
         field: "action",
-        headerName: "Action",
+        headerName: "Chỉnh sửa",
         flex: 1,
         renderCell: (params) => (
           <div>
-            <button
+            <IconButton
+              color="primary"
               onClick={() => {
                 this.setState({ row: params.value[2], type: "edit" });
               }}
             >
-              {params.value[0]}
-            </button>
-            <button
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              color="primary"
               onClick={() => {
-                this.props.deleteType(params.value[2].id);
+                this.deleteType(params.value[2].id);
               }}
             >
-              {params.value[1]}
-            </button>
+              <DeleteIcon />
+            </IconButton>
           </div>
         ),
       },
@@ -57,15 +80,15 @@ class TableType extends Component {
       });
 
     return (
-      <div>
+      <div className="table">
         <div className="table-header">
           <h1>Danh mục</h1>
-          <div
-            className="tbl-btn-add"
+          <IconButton
+            color="primary"
             onClick={() => this.setState({ type: "add" })}
           >
-            <span>Thêm danh mục</span>
-          </div>
+            <AddIcon></AddIcon>
+          </IconButton>
         </div>
         <div style={{ width: "100%" }}>
           <DataGrid
@@ -77,34 +100,31 @@ class TableType extends Component {
           />
         </div>
         {this.state.type === "add" && (
-          <Modal isOpen="true">
-            <Zoom>
-              <button
-                className="close-modal"
-                onClick={() => {
-                  this.setState({ type: "", row: null });
-                }}
-              >
-                x
-              </button>
-              <FormType type="add" row={this.state.row}></FormType>
-            </Zoom>
+          <Modal isOpen="true" portalClassName="modal modal-type">
+            <IconButton
+              onClick={() => {
+                this.setState({ type: "", row: null });
+              }}
+            >
+              <CloseIcon color="primary"></CloseIcon>
+            </IconButton>
+            <FormType type="add" row={this.state.row}></FormType>
           </Modal>
         )}
         {this.state.type === "edit" && (
-          <Modal isOpen="true">
-            <Zoom>
-              <button
-                className="close-modal"
-                onClick={() => {
-                  this.setState({ type: "", row: null });
-                }}
-              >
-                x
-              </button>
-              <FormType type="edit" row={this.state.row}></FormType>
-            </Zoom>
+          <Modal isOpen="true" portalClassName="modal modal-type">
+            <IconButton
+              onClick={() => {
+                this.setState({ type: "", row: null });
+              }}
+            >
+              <CloseIcon color="primary"></CloseIcon>
+            </IconButton>
+            <FormType type="edit" row={this.state.row}></FormType>
           </Modal>
+        )}
+        {this.state.alert && (
+          <Alert severity={this.state.alert.type}>{this.state.alert.msg}</Alert>
         )}
       </div>
     );
@@ -113,5 +133,4 @@ class TableType extends Component {
 
 export default connect((state) => ({ data: state.table.type }), {
   fetchType,
-  deleteType,
 })(TableType);

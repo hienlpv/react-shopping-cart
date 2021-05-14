@@ -2,8 +2,52 @@ import React from "react";
 import { connect } from "react-redux";
 import Filter from "../components/Filter";
 import Products from "../components/Products";
+import Modal from "react-modal";
+import Zoom from "react-reveal/Zoom";
+import Fade from "react-reveal/Fade";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import Alert from "@material-ui/lab/Alert";
 
 class Home extends React.Component {
+  state = {
+    showModalSignup: false,
+    dataSignup: { name: "", username: "", password: "", email: "", phone: "" },
+    signupNoti: {},
+  };
+
+  submitSignup = (e) => {
+    e.preventDefault();
+    fetch(`/api/account/${this.state.dataSignup.username}`)
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.type === "warning") {
+          this.setState({
+            signupNoti: res,
+          });
+        } else {
+          fetch("/api/account", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(this.state.dataSignup),
+          })
+            .then((res) => res.json())
+            .then((res) => {
+              this.setState({ signupNoti: res });
+            });
+        }
+      });
+  };
+
+  handleInputSignup = (e) => {
+    let dataSignup = Object.assign(this.state.dataSignup);
+    dataSignup[e.target.name] = e.target.value;
+    this.setState({ dataSignup });
+  };
+
   render() {
     return (
       <div className="grid-container">
@@ -39,10 +83,18 @@ class Home extends React.Component {
                 ></img>
               </span>
             </span>
-            <div className="header-account-dropdown-content">
-              <button>Đăng nhập</button>
-              <button>Tạo tài khoản</button>
-            </div>
+            <Fade top>
+              <div className="header-account-dropdown-content">
+                <button>Đăng nhập</button>
+                <button
+                  onClick={() => {
+                    this.setState({ showModalSignup: true });
+                  }}
+                >
+                  Tạo tài khoản
+                </button>
+              </div>
+            </Fade>
           </div>
           <div className="header-cart">
             <a href="/cart">
@@ -69,6 +121,71 @@ class Home extends React.Component {
           </div>
         </main>
         <footer>All right is reserved.</footer>
+        {this.state.showModalSignup && (
+          <Modal isOpen="true" portalClassName="modal-signup">
+            <Zoom>
+              <button
+                onClick={() => {
+                  this.setState({ showModalSignup: false });
+                }}
+              >
+                X
+              </button>
+              <h1>Đăng ký</h1>
+              <form
+                className="form-sign-up"
+                Validate
+                onSubmit={this.submitSignup}
+              >
+                <TextField
+                  required
+                  label="Họ và tên"
+                  name="name"
+                  onChange={this.handleInputSignup}
+                />
+                <TextField
+                  required
+                  label="UserName"
+                  name="username"
+                  onChange={this.handleInputSignup}
+                />
+                <TextField
+                  required
+                  name="password"
+                  label="Password"
+                  type="password"
+                  autoComplete="current-password"
+                  onChange={this.handleInputSignup}
+                />
+                <TextField
+                  required
+                  label="Email"
+                  name="email"
+                  type="email"
+                  onChange={this.handleInputSignup}
+                />
+                <TextField
+                  required
+                  label="Số điện thoại"
+                  name="phone"
+                  onChange={this.handleInputSignup}
+                />
+                <Button type="submit" color="primary" variant="outlined">
+                  Sign Up
+                </Button>
+                {this.state.signupNoti.type === "success" && (
+                  <Alert severity="success">{this.state.signupNoti.msg}</Alert>
+                )}
+                {this.state.signupNoti.type === "err" && (
+                  <Alert severity="error">{this.state.signupNoti.msg}</Alert>
+                )}
+                {this.state.signupNoti.type === "warning" && (
+                  <Alert severity="warning">{this.state.signupNoti.msg}</Alert>
+                )}
+              </form>
+            </Zoom>
+          </Modal>
+        )}
       </div>
     );
   }

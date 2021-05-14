@@ -1,13 +1,11 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { removeVietnameseTones } from "../utils";
-import {
-  fetchMark,
-  addProducts,
-  fetchColor,
-  editProducts,
-  fetchType,
-} from "../actions/tableActions";
+import { fetchMark, fetchColor, fetchType } from "../actions/tableActions";
+import { fetchProducts } from "../actions/productActions";
+import { Select, MenuItem, TextField, Button } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import axios from "axios";
 
 class FormProduct extends Component {
   constructor(props) {
@@ -22,13 +20,72 @@ class FormProduct extends Component {
       productPrice: this.props.row ? this.props.row.price : "0",
       files: [],
       res: false,
+      alert: null,
     };
   }
+
   componentDidMount() {
     this.props.fetchMark();
     this.props.fetchColor();
     this.props.fetchType();
+    console.log(this.props.color);
   }
+
+  addProducts = async (data) => {
+    var formData = new FormData();
+    data.files.forEach((item) => {
+      formData.append(Object.keys(item)[0], item[Object.keys(item)[0]]);
+    });
+    formData.append("title", data.productTitle);
+    formData.append("type", data.productType);
+    formData.append("image", data.productImage);
+    formData.append("mark", data.productMark);
+    formData.append("description", data.productDesc);
+    formData.append("colors", data.productColor);
+    formData.append("price", data.productPrice);
+
+    try {
+      const res = await axios.post("/api/products", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (res.data.type === "success") this.props.fetchProducts();
+      this.setState({ alert: res.data });
+      setTimeout(() => {
+        this.setState({ alert: null });
+      }, 1000);
+    } catch (err) {}
+  };
+
+  editProducts = async (data) => {
+    var formData = new FormData();
+    data.files.forEach((item) => {
+      formData.append(Object.keys(item)[0], item[Object.keys(item)[0]]);
+    });
+    formData.append("id", data.id);
+    formData.append("title", data.productTitle);
+    formData.append("type", data.productType);
+    formData.append("image", data.productImage);
+    formData.append("mark", data.productMark);
+    formData.append("description", data.productDesc);
+    formData.append("colors", data.productColor);
+    formData.append("price", data.productPrice);
+
+    try {
+      const res = await axios.post("/api/products/update", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (res.data.type === "success") this.props.fetchProducts();
+      this.setState({ alert: res.data });
+      setTimeout(() => {
+        this.setState({ alert: null });
+      }, 1000);
+    } catch (err) {}
+  };
+
   handleFile = (e) => {
     let files = [...this.state.files];
     let images = [...this.state.productImage];
@@ -38,16 +95,23 @@ class FormProduct extends Component {
 
     if (
       !images.includes(
-        `/images/${this.state.productTitle}-${e.target.name}.${ex}`
+        `/images/${this.state.productTitle.split(" ").join("-")}-${
+          e.target.name
+        }.${ex}`
       )
     )
-      images.push(`/images/${this.state.productTitle}-${e.target.name}.${ex}`);
+      images.push(
+        `/images/${this.state.productTitle.split(" ").join("-")}-${
+          e.target.name
+        }.${ex}`
+      );
 
     this.setState({
       files: files,
       productImage: images,
     });
   };
+
   handleInput = (e) => {
     if (e.target.name === "productColor") {
       let color = [...this.state.productColor];
@@ -72,7 +136,6 @@ class FormProduct extends Component {
           (item) =>
             Object.keys(item)[0] !== removeVietnameseTones(e.target.value)
         );
-        console.log(files);
         document.querySelector(`#${e.target.id}-image`).style = "display: none";
       }
       this.setState({
@@ -85,6 +148,7 @@ class FormProduct extends Component {
         [e.target.name]: e.target.value,
       });
   };
+
   addSubmit = async () => {
     let data = {
       productTitle: this.state.productTitle,
@@ -96,12 +160,12 @@ class FormProduct extends Component {
       productPrice: this.state.productPrice,
       files: this.state.files,
     };
-    await this.props.addProducts(data);
+    await this.addProducts(data);
     this.clearForm();
   };
 
   clearForm = () => {
-    document.getElementById("Product-form").reset();
+    document.querySelector(".form-product").reset();
     document.querySelectorAll(".productImage").forEach((item) => {
       item.style = "display: none";
     });
@@ -128,254 +192,229 @@ class FormProduct extends Component {
       productPrice: this.state.productPrice,
       files: this.state.files,
     };
-    console.log(data);
-    await this.props.editProducts(data);
-    this.setState({
-      res: true,
-    });
+    await this.editProducts(data);
   };
   render() {
     switch (this.props.type) {
       case "add":
         return (
-          <div className="form">
+          <div className="form-wrap">
             <h1>Thêm sản phẩm</h1>
             <form
-              id="Product-form"
+              className="form-product"
               onSubmit={async (e) => {
                 e.preventDefault();
                 this.addSubmit();
               }}
             >
-              <label for="productType">
-                <p>Danh mục:</p>
-                {this.props.productType && (
-                  <select
-                    name="productType"
-                    onChange={this.handleInput}
-                    className="form-control"
-                  >
-                    <option defaultChecked value="">
-                      Chọn danh mục
-                    </option>
-                    {this.props.productType.map((item, index) => (
-                      <option key={index} value={item.title}>
-                        {item.title}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </label>
-              <label for="productTitle">
-                <p>Tên sản phẩm:</p>
-                <input
-                  className="form-control"
-                  type="text"
-                  name="productTitle"
-                  id="productTitle"
-                  value={this.state.productTitle}
+              {this.props.productType && (
+                <Select
+                  name="productType"
                   onChange={this.handleInput}
-                ></input>
-              </label>
-              <label for="productMark">
-                <p>Thương hiệu:</p>
-                {this.props.mark && (
-                  <select
-                    className="form-control"
-                    name="productMark"
-                    onChange={this.handleInput}
-                  >
-                    <option defaultChecked value="">
-                      Chọn thương hiệu
-                    </option>
-                    {this.props.mark.map((item, index) => (
-                      <option key={index} value={item.title}>
-                        {item.title}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </label>
-              <label for="productDesc">
-                <p>Mô tả:</p>
-                <textarea
-                  className="form-control"
-                  name="productDesc"
-                  id="productDesc"
+                  displayEmpty
+                  value={this.state.productType}
+                >
+                  <MenuItem value="" disabled>
+                    Danh mục
+                  </MenuItem>
+                  {this.props.productType.map((item, index) => (
+                    <MenuItem key={index} value={item.title}>
+                      {item.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+              {this.props.mark && (
+                <Select
+                  name="productMark"
                   onChange={this.handleInput}
-                  value={this.state.productDesc}
-                ></textarea>
-              </label>
-              <label>
-                <p>Màu:</p>
-                {this.props.color && (
-                  <div className="form-control">
-                    {this.props.color.map((item, index) => (
-                      <div>
-                        <input
-                          className="checkbox"
-                          type="checkbox"
-                          name="productColor"
-                          key={index}
-                          id={item.title}
-                          value={item.title}
-                          onClick={this.handleInput}
-                        ></input>
-                        <label for={item.title}>{item.title}</label>
+                  displayEmpty
+                  value={this.state.productMark}
+                >
+                  <MenuItem value="" disabled>
+                    Thương hiệu
+                  </MenuItem>
+                  {this.props.mark.map((item, index) => (
+                    <MenuItem key={index} value={item.title}>
+                      {item.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+              <TextField
+                label="Tên sản phẩm"
+                id="productTitle"
+                name="productTitle"
+                value={this.state.productTitle}
+                onChange={this.handleInput}
+              />
+              <textarea
+                rows={5}
+                placeholder="Mô tả"
+                className="form-control"
+                name="productDesc"
+                id="productDesc"
+                onChange={this.handleInput}
+                value={this.state.productDesc}
+              ></textarea>
+              {this.props.color && (
+                <div className="input-color">
+                  {this.props.color.map((item, index) => (
+                    <div>
+                      <input
+                        className="checkbox"
+                        type="checkbox"
+                        name="productColor"
+                        key={index}
+                        id={item.title.split(" ").join("-")}
+                        value={item.title}
+                        onClick={this.handleInput}
+                      ></input>
+                      <label for={item.title}>{item.title}</label>
 
-                        <input
-                          className="productImage"
-                          id={`${item.title}-image`}
-                          style={{ display: "none" }}
-                          name={item.value}
-                          type="file"
-                          accept="image/*"
-                          onChange={this.handleFile}
-                        ></input>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </label>
-
-              <label for="productPrice">
-                <p>Giá:</p>
-                <input
-                  className="form-control"
-                  type="number"
-                  name="productPrice"
-                  id="productPrice"
-                  value={this.state.productPrice}
-                  step="1000"
-                  onChange={this.handleInput}
-                ></input>
-              </label>
-              <button type="submit" className="button">
+                      <input
+                        className="productImage"
+                        id={`${item.title.split(" ").join("-")}-image`}
+                        style={{ display: "none" }}
+                        name={item.value.split(" ").join("-")}
+                        type="file"
+                        accept="image/*"
+                        onChange={this.handleFile}
+                      ></input>
+                    </div>
+                  ))}
+                </div>
+              )}
+              Giá:
+              <input
+                className="form-control"
+                type="number"
+                name="productPrice"
+                id="productPrice"
+                value={this.state.productPrice}
+                step="1000"
+                onChange={this.handleInput}
+              ></input>
+              <Button variant="outlined" color="primary" type="submit">
                 Thêm sản phẩm
-              </button>
+              </Button>
             </form>
-            {this.state.res && <p>SUCCESS</p>}
+            {this.state.alert && (
+              <Alert severity={this.state.alert.type}>
+                {this.state.alert.msg}
+              </Alert>
+            )}
           </div>
         );
       case "edit":
         return (
-          <div className="form">
+          <div className="form-wrap">
             <h1>Sửa sản phẩm</h1>
             <form
-              id="Product-form"
-              onSubmit={(e) => {
+              className="form-product"
+              onSubmit={async (e) => {
                 e.preventDefault();
                 this.editSubmit();
               }}
             >
-              <label for="productType">
-                <p>Danh mục:</p>
-                {this.props.productType && (
-                  <select
-                    name="productType"
-                    onChange={this.handleInput}
-                    className="form-control"
-                    value={this.state.productType}
-                  >
-                    <option defaultChecked value="">
-                      Chọn danh mục
-                    </option>
-                    {this.props.productType.map((item, index) => (
-                      <option key={index} value={item.title}>
-                        {item.title}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </label>
-              <label for="productTitle">
-                <p>Tên sản phẩm:</p>
-                <input
-                  className="form-control"
-                  type="text"
-                  name="productTitle"
-                  id="productTitle"
-                  value={this.state.productTitle}
+              {this.props.productType && (
+                <Select
+                  name="productType"
                   onChange={this.handleInput}
-                ></input>
-              </label>
-              <label for="productMark">
-                <p>Thương hiệu:</p>
-                {this.props.mark && (
-                  <select
-                    className="form-control"
-                    name="productMark"
-                    onChange={this.handleInput}
-                    value={this.state.productMark}
-                  >
-                    <option defaultChecked value="">
-                      Chọn thương hiệu
-                    </option>
-                    {this.props.mark.map((item, index) => (
-                      <option key={index} value={item.title}>
-                        {item.title}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </label>
-              <label for="productDesc">
-                <p>Mô tả:</p>
-                <textarea
-                  className="form-control"
-                  name="productDesc"
-                  id="productDesc"
+                  displayEmpty
+                  value={this.state.productType}
+                >
+                  <MenuItem value="" disabled>
+                    Danh mục
+                  </MenuItem>
+                  {this.props.productType.map((item, index) => (
+                    <MenuItem key={index} value={item.title}>
+                      {item.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+              {this.props.mark && (
+                <Select
+                  name="productMark"
                   onChange={this.handleInput}
-                  value={this.state.productDesc}
-                ></textarea>
-              </label>
-              <label>
-                <p>Màu:</p>
-                {this.props.color && (
-                  <div className="form-control">
-                    {this.props.color.map((item) => (
-                      <div>
-                        <input
-                          type="checkbox"
-                          name="productColor"
-                          id={item.title}
-                          value={item.title}
-                          onClick={this.handleInput}
-                          checked={this.state.productColor.includes(item.title)}
-                        ></input>
-                        <label for={item.title}>{item.title}</label>
-                        <input
-                          className="productImage"
-                          id={`${item.title}-image`}
-                          style={{ display: "none" }}
-                          name={item.value}
-                          type="file"
-                          accept="image/*"
-                          onChange={this.handleFile}
-                        ></input>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </label>
+                  displayEmpty
+                  value={this.state.productMark}
+                >
+                  <MenuItem value="" disabled>
+                    Thương hiệu
+                  </MenuItem>
+                  {this.props.mark.map((item, index) => (
+                    <MenuItem key={index} value={item.title}>
+                      {item.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              )}
+              <TextField
+                label="Tên sản phẩm"
+                id="productTitle"
+                name="productTitle"
+                value={this.state.productTitle}
+                onChange={this.handleInput}
+              />
+              <textarea
+                rows={5}
+                placeholder="Mô tả"
+                className="form-control"
+                name="productDesc"
+                id="productDesc"
+                onChange={this.handleInput}
+                value={this.state.productDesc}
+              ></textarea>
+              {this.props.color && (
+                <div className="input-color">
+                  {this.props.color.map((item, index) => (
+                    <div>
+                      <input
+                        className="checkbox"
+                        type="checkbox"
+                        name="productColor"
+                        key={index}
+                        id={item.title.split(" ").join("-")}
+                        value={item.title}
+                        onClick={this.handleInput}
+                        checked={this.state.productColor.includes(item.title)}
+                      ></input>
+                      <label for={item.title}>{item.title}</label>
 
-              <label for="productPrice">
-                <p>Giá:</p>
-                <input
-                  className="form-control"
-                  type="number"
-                  name="productPrice"
-                  id="productPrice"
-                  value={this.state.productPrice}
-                  step="1000"
-                  onChange={this.handleInput}
-                ></input>
-              </label>
-              <button type="submit" className="button">
+                      <input
+                        className="productImage"
+                        id={`${item.title.split(" ").join("-")}-image`}
+                        style={{ display: "none" }}
+                        name={item.value.split(" ").join("-")}
+                        type="file"
+                        accept="image/*"
+                        onChange={this.handleFile}
+                      ></input>
+                    </div>
+                  ))}
+                </div>
+              )}
+              Giá:
+              <input
+                className="form-control"
+                type="number"
+                name="productPrice"
+                id="productPrice"
+                value={this.state.productPrice}
+                step="1000"
+                onChange={this.handleInput}
+              ></input>
+              <Button variant="outlined" color="primary" type="submit">
                 Sửa sản phẩm
-              </button>
+              </Button>
             </form>
-            {this.state.res && <p>SUCCESS</p>}
+            {this.state.alert && (
+              <Alert severity={this.state.alert.type}>
+                {this.state.alert.msg}
+              </Alert>
+            )}
           </div>
         );
       default:
@@ -393,8 +432,7 @@ export default connect(
   {
     fetchMark,
     fetchColor,
-    addProducts,
-    editProducts,
     fetchType,
+    fetchProducts,
   }
 )(FormProduct);

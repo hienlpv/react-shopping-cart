@@ -3,6 +3,7 @@ const fileUpload = require("express-fileupload");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const shortid = require("shortid");
+const bcrypt = require("bcrypt");
 
 const app = express();
 app.use(bodyParser.json());
@@ -43,17 +44,49 @@ app.get("/api/account", async (reg, res) => {
 app.get("/api/account/:username", async (req, res) => {
   try {
     const account = await User.find({ username: req.params.username });
-    res.send(account);
-  } catch (e) {
-    console.log(e);
-  }
+    if (account.length !== 0) {
+      res.json({ type: "warning", msg: "username đã tồn tại" });
+    } else {
+      res.json({ type: "noti", msg: "username chưa tồn tại" });
+    }
+  } catch (err) {}
 });
 
 app.post("/api/account", async (req, res) => {
-  const newAccount = new User(req.body);
-  await newAccount.save();
-  const account = await User.find({});
-  res.send(account);
+  let data = Object.assign(req.body);
+  bcrypt.genSalt(10, (err, salt) => {
+    bcrypt.hash(data.password, salt, async (err, salt) => {
+      data.password = salt;
+      try {
+        const newAccount = new User(data);
+        await newAccount.save();
+        res.json({
+          type: "success",
+          msg: "Đăng ký tài khoản thành công",
+        });
+      } catch (err) {
+        res.json({ type: "err", msg: err });
+      }
+    });
+  });
+});
+
+app.post("/api/account/update", async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.body.id, req.body);
+    res.json({ type: "success", msg: "Cập nhật thành công" });
+  } catch (err) {
+    res.json({ type: "err", msg: err });
+  }
+});
+
+app.delete("/api/account/:id", async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ type: "success", msg: "Xoá thành công" });
+  } catch (err) {
+    res.json({ type: "err", msg: err });
+  }
 });
 
 // --------------------------------PRODUCTS--------------------------------
@@ -83,31 +116,43 @@ app.get("/api/products", async (req, res) => {
 
 app.post("/api/products", async (req, res) => {
   if (req.files == null) {
-    return res.status(400).json({ msg: "No Image uploaded" });
+    return res.json({ type: "error", msg: "Sản phẩm phải có hình ảnh" });
   }
-
-  Object.keys(req.files).forEach((item) => {
-    let ex = req.files[item].name.split(".").pop();
-    req.files[item].mv(
-      `${__dirname}/public/images/${req.body.title}-${item}.${ex}`,
-      (err) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).send(err);
+  try {
+    Object.keys(req.files).forEach((item) => {
+      let ex = req.files[item].name.split(".").pop();
+      let name = req.body.title.split(" ").join("-");
+      req.files[item].mv(
+        `${__dirname}/public/images/${name}-${item}.${ex}`,
+        (err) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).send(err);
+          }
         }
-      }
-    );
-  });
-  const newProduct = new Product(req.body);
-  await newProduct.save();
-  const products = await Product.find({});
-  res.send(products);
+      );
+    });
+    const newProduct = new Product(req.body);
+    await newProduct.save();
+    res.json({
+      type: "success",
+      msg: "Thêm sản phảm thành công!",
+    });
+  } catch (err) {
+    res.json({
+      type: "error",
+      msg: err,
+    });
+  }
 });
 
 app.delete("/api/products/:id", async (req, res) => {
-  await Product.findByIdAndDelete(req.params.id);
-  const products = await Product.find({});
-  res.send(products);
+  try {
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ type: "success", msg: `Đã xoá sản phẩm ${req.params.id}` });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.delete("/api/products/", async (req, res) => {
@@ -119,8 +164,9 @@ app.post("/api/products/update", async (req, res) => {
   if (req.files) {
     Object.keys(req.files).forEach((item) => {
       let ex = req.files[item].name.split(".").pop();
+      let name = req.body.title.split(" ").join("-");
       req.files[item].mv(
-        `${__dirname}/public/images/${req.body.title}-${item}.${ex}`,
+        `${__dirname}/public/images/${name}-${item}.${ex}`,
         (err) => {
           if (err) {
             console.error(err);
@@ -130,9 +176,12 @@ app.post("/api/products/update", async (req, res) => {
       );
     });
   }
-  await Product.findByIdAndUpdate(req.body.id, req.body);
-  const products = await Product.find({});
-  res.send(products);
+  try {
+    await Product.findByIdAndUpdate(req.body.id, req.body);
+    res.json({ type: "success", msg: "Cập nhật thành công!" });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 // --------------------------------MARK--------------------------------
 const Mark = mongoose.model(
@@ -153,22 +202,31 @@ app.get("/api/mark", async (reg, res) => {
 });
 
 app.post("/api/mark", async (req, res) => {
-  const newMark = new Mark(req.body);
-  await newMark.save();
-  const mark = await Mark.find({});
-  res.send(mark);
+  try {
+    const newMark = new Mark(req.body);
+    await newMark.save();
+    res.json({ type: "success", msg: "Thêm thương hiệu thành công" });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.post("/api/mark/update", async (req, res) => {
-  await Mark.findByIdAndUpdate(req.body.id, req.body);
-  const mark = await Mark.find({});
-  res.send(mark);
+  try {
+    await Mark.findByIdAndUpdate(req.body.id, req.body);
+    res.json({ type: "success", msg: "Cập nhật thương hiệu thành công" });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.delete("/api/mark/:id", async (req, res) => {
-  await Mark.findByIdAndDelete(req.params.id);
-  const mark = await Mark.find({});
-  res.send(mark);
+  try {
+    await Mark.findByIdAndDelete(req.params.id);
+    res.json({ type: "success", msg: `Đã xoá thương hiệu ${req.params.id}` });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.delete("/api/mark/", async (req, res) => {
@@ -196,22 +254,31 @@ app.get("/api/color", async (reg, res) => {
 });
 
 app.post("/api/color", async (req, res) => {
-  const newColor = new Color(req.body);
-  await newColor.save();
-  const color = await Color.find({});
-  res.send(color);
+  try {
+    const newColor = new Color(req.body);
+    await newColor.save();
+    res.json({ type: "success", msg: "Thêm màu thành công!" });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.post("/api/color/update", async (req, res) => {
-  await Color.findByIdAndUpdate(req.body.id, req.body);
-  const color = await Color.find({});
-  res.send(color);
+  try {
+    await Color.findByIdAndUpdate(req.body.id, req.body);
+    res.json({ type: "success", msg: "Cập nhật màu thành công!" });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.delete("/api/color/:id", async (req, res) => {
-  await Color.findByIdAndDelete(req.params.id);
-  const color = await Color.find({});
-  res.send(color);
+  try {
+    await Color.findByIdAndDelete(req.params.id);
+    res.json({ type: "success", msg: `Đã xoá màu ${req.params.id}` });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.delete("/api/color/", async (req, res) => {
@@ -238,22 +305,31 @@ app.get("/api/type", async (reg, res) => {
 });
 
 app.post("/api/type", async (req, res) => {
-  const newType = new Type(req.body);
-  await newType.save();
-  const type = await Type.find({});
-  res.send(type);
+  try {
+    const newType = new Type(req.body);
+    await newType.save();
+    res.json({ type: "success", msg: "Thêm danh mục thành công!" });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.post("/api/type/update", async (req, res) => {
-  await Type.findByIdAndUpdate(req.body.id, req.body);
-  const type = await Type.find({});
-  res.send(type);
+  try {
+    await Type.findByIdAndUpdate(req.body.id, req.body);
+    res.json({ type: "success", msg: "Cập nhật danh mục thành công!" });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.delete("/api/type/:id", async (req, res) => {
-  await Type.findByIdAndDelete(req.params.id);
-  const type = await Type.find({});
-  res.send(type);
+  try {
+    await Type.findByIdAndDelete(req.params.id);
+    res.json({ type: "success", msg: "Đã xoá danh mục " + req.params.id + "" });
+  } catch (err) {
+    res.json({ type: "error", msg: err });
+  }
 });
 
 app.delete("/api/type/", async (req, res) => {

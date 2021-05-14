@@ -1,25 +1,9 @@
-import {
-  FETCH_PRODUCTS,
-  FILTER_PRODUCTS,
-  SORT_PRODUCTS,
-  ADD_PRODUCT,
-  DELETE_PRODUCT,
-  EDIT_PRODUCT,
-} from "../types";
+import { FETCH_PRODUCTS, FILTER_PRODUCTS, SORT_PRODUCTS } from "../types";
 
 export const productsReducer = (state = {}, action) => {
   switch (action.type) {
     case FETCH_PRODUCTS:
-      return { items: action.payload, filteredItems: action.payload };
-    case ADD_PRODUCT:
-      return {
-        items: action.payload,
-        filteredItems: action.payload,
-      };
-    case DELETE_PRODUCT:
-      return { ...state, items: action.payload };
-    case EDIT_PRODUCT:
-      return { ...state, items: action.payload };
+      return { items: action.payload };
     case FILTER_PRODUCTS:
       console.log(state);
       return {
