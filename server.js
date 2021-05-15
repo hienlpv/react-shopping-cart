@@ -35,6 +35,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const shortid = require("shortid");
 const bcrypt = require("bcrypt");
+const path = require("path");
 
 const app = express();
 app.use(bodyParser.json());
@@ -414,5 +415,10 @@ app.delete("/api/type/", async (req, res) => {
   res.send(deleteType);
 });
 
-const port = process.env.port || 5000;
+app.use(express.static(path.join(__dirname, "../build")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../build"));
+});
+
+const port = process.env.PORT || 5000;
 app.listen(port, () => console.log("server listen on http://localhost:5000"));
