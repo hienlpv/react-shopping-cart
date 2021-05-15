@@ -3,17 +3,17 @@ import { connect } from "react-redux";
 import Filter from "../components/Filter";
 import Products from "../components/Products";
 import Modal from "react-modal";
-import Zoom from "react-reveal/Zoom";
 import Fade from "react-reveal/Fade";
 import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
+import { Button, IconButton } from "@material-ui/core";
 import Alert from "@material-ui/lab/Alert";
+import CloseIcon from "@material-ui/icons/Close";
 
 class Home extends React.Component {
   state = {
     showModalSignup: false,
     dataSignup: { name: "", username: "", password: "", email: "", phone: "" },
-    signupNoti: {},
+    alert: null,
   };
 
   submitSignup = (e) => {
@@ -36,7 +36,10 @@ class Home extends React.Component {
           })
             .then((res) => res.json())
             .then((res) => {
-              this.setState({ signupNoti: res });
+              this.setState({ alert: res });
+              setTimeout(() => {
+                this.setState({ alert: null });
+              }, 1000);
             });
         }
       });
@@ -122,15 +125,15 @@ class Home extends React.Component {
         </main>
         <footer>All right is reserved.</footer>
         {this.state.showModalSignup && (
-          <Modal isOpen="true" portalClassName="modal-signup">
-            <Zoom>
-              <button
-                onClick={() => {
-                  this.setState({ showModalSignup: false });
-                }}
-              >
-                X
-              </button>
+          <Modal isOpen="true" portalClassName="modal modal-signup">
+            <IconButton
+              onClick={() => {
+                this.setState({ showModalSignup: false });
+              }}
+            >
+              <CloseIcon color="primary"></CloseIcon>
+            </IconButton>
+            <div className="form-wrap">
               <h1>Đăng ký</h1>
               <form
                 className="form-sign-up"
@@ -173,17 +176,13 @@ class Home extends React.Component {
                 <Button type="submit" color="primary" variant="outlined">
                   Sign Up
                 </Button>
-                {this.state.signupNoti.type === "success" && (
-                  <Alert severity="success">{this.state.signupNoti.msg}</Alert>
-                )}
-                {this.state.signupNoti.type === "err" && (
-                  <Alert severity="error">{this.state.signupNoti.msg}</Alert>
-                )}
-                {this.state.signupNoti.type === "warning" && (
-                  <Alert severity="warning">{this.state.signupNoti.msg}</Alert>
-                )}
               </form>
-            </Zoom>
+              {this.state.alert && (
+                <Alert severity={this.state.alert.type}>
+                  {this.state.alert.msg}
+                </Alert>
+              )}
+            </div>
           </Modal>
         )}
       </div>

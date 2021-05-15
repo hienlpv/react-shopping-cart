@@ -270,6 +270,8 @@ header {
 .form-sign-up {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  height: 90%;
 }
 .form-product {
   display: flex;
@@ -316,7 +318,7 @@ header {
 
 /* --------------------------------MODAL------------------------------- */
 .modal-signup > div > div {
-  inset: 20% 30% !important;
+  inset: 15% 30% !important;
 }
 
 .modal-product.view > div > div {

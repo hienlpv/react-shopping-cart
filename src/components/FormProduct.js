@@ -95,15 +95,15 @@ class FormProduct extends Component {
 
     if (
       !images.includes(
-        `/images/${this.state.productTitle.split(" ").join("-")}-${
-          e.target.name
-        }.${ex}`
+        `/images/${removeVietnameseTones(this.state.productTitle)
+          .split(" ")
+          .join("-")}-${e.target.name}.${ex}`
       )
     )
       images.push(
-        `/images/${this.state.productTitle.split(" ").join("-")}-${
-          e.target.name
-        }.${ex}`
+        `/images/${removeVietnameseTones(this.state.productTitle)
+          .split(" ")
+          .join("-")}-${e.target.name}.${ex}`
       );
 
     this.setState({
