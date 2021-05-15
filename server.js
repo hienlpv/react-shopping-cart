@@ -383,5 +383,5 @@ app.delete("/api/type/", async (req, res) => {
   res.send(deleteType);
 });
 
-const port = process.env.port || 5000;
+const port = process.env.HEROKU_PRIVATE_IP || '0.0.0.0';
 app.listen(port, () => console.log("server listen on http://localhost:5000"));
