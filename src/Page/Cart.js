@@ -1,154 +1,331 @@
 import React, { Component } from "react";
-import formatCurrency from "../utils";
-import Fade from "react-reveal/Fade";
 import { connect } from "react-redux";
-import { addProductToCart } from "../actions/productActions";
-import { removeProductFromCart } from "../actions/cartActions";
-import { addOrder } from "../actions/tableActions";
+import { cleanCart } from "../actions/cartActions";
+import Modal from "react-modal";
+import Fade from "react-reveal/Fade";
+import TextField from "@material-ui/core/TextField";
+import { Button, IconButton } from "@material-ui/core";
+import Alert from "@material-ui/lab/Alert";
+import CloseIcon from "@material-ui/icons/Close";
+import CartProducts from "../components/CartProducts";
+import Checkout from "../components/Checkout";
 class Cart extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      showCheckout: false,
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
-    };
-  }
-  handleInput = (e) => {
-    this.setState({ [e.target.name]: e.target.value });
+  state = {
+    isLogin: localStorage.getItem("user") ? true : false,
+    showModalSignup: false,
+    showModalLogin: false,
+    dataSignup: { name: "", username: "", password: "", email: "", phone: "" },
+    dataLogin: { username: "", password: "" },
+    alert: null,
+    userName: localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user"))
+      : {},
   };
-  createOrder = (e) => {
-    let products = [];
-    this.props.cartItems.forEach((item) => {
-      products.push(item._id);
-    });
+
+  submitSignup = (e) => {
     e.preventDefault();
-    const order = {
-      name: this.state.name,
-      email: this.state.email,
-      phone: this.state.phone,
-      address: this.state.address,
-      products: products,
-    };
-    this.props.addOrder(order);
+    fetch(`/api/account/${this.state.dataSignup.username}`)
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.type === "warning") {
+          this.setState({
+            signupNoti: res,
+          });
+        } else {
+          fetch("/api/account", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(this.state.dataSignup),
+          })
+            .then((res) => res.json())
+            .then((res) => {
+              this.setState({ alert: res });
+              setTimeout(() => {
+                this.setState({
+                  alert: null,
+                  showModalSignup: false,
+                  showModalLogin: true,
+                });
+              }, 1000);
+            });
+        }
+      });
+  };
+
+  submitLogin = (e) => {
+    e.preventDefault();
+    fetch("/api/account/login", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(this.state.dataLogin),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.type === "success") {
+          this.setState({
+            showModalLogin: false,
+            isLogin: true,
+            userName: res.msg,
+          });
+          localStorage.setItem("user", JSON.stringify(res.msg));
+        } else {
+          this.setState({ alert: res });
+          setTimeout(() => {
+            this.setState({ alert: null });
+          }, 1000);
+        }
+      });
+  };
+
+  handleInputSignup = (e) => {
+    let dataSignup = Object.assign(this.state.dataSignup);
+    dataSignup[e.target.name] = e.target.value;
+    this.setState({ dataSignup });
+  };
+
+  handleInputLogin = (e) => {
+    let dataLogin = Object.assign(this.state.dataLogin);
+    dataLogin[e.target.name] = e.target.value;
+    this.setState({ dataLogin });
   };
   render() {
-    // localStorage.setItem("cartItems", []);
-    const { cartItems } = this.props;
     return (
-      <div>
-        {cartItems.length === 0 ? (
-          <div className="cart cart-header">Cart is empty</div>
-        ) : (
-          <div className="cart cart-header">
-            You have {cartItems.length} in the cart{" "}
-          </div>
-        )}
-        <div className="cart">
-          <Fade left cascade>
-            <ul className="cart-items">
-              {cartItems.map((item) => (
-                <li key={item._id}>
-                  <div>
-                    <img src={item.image[0]} alt={item.title}></img>
-                  </div>
-                  <div>
-                    <div>{item.title}</div>
-                    <div className="right">
-                      {formatCurrency(item.price)} x {item.count}{" "}
-                      <button
-                        className="button"
-                        onClick={async () => {
-                          await this.props.removeProductFromCart(
-                            cartItems,
-                            item
-                          );
-                          if (this.props.cartItems.length === 0)
-                            this.setState({ showCheckout: false });
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Fade>
-        </div>
-        {cartItems.length !== 0 && (
-          <div className="cart">
-            <div className="total">
-              <div>
-                Total{" "}
-                {formatCurrency(
-                  cartItems.reduce((a, c) => a + c.price * c.count, 0)
-                )}
-              </div>
-              <button
-                onClick={() => {
-                  this.setState({ showCheckout: true });
-                }}
-                className="button primary"
-              >
-                Proceed
+      <div className="cartPage">
+        <div className="grid-container">
+          <header>
+            <a className="title" href="/">
+              React Shopping Cart
+            </a>
+            <div className="header-search">
+              <input type="text"></input>
+              <button>
+                <img
+                  class="icon-search"
+                  src="https://salt.tikicdn.com/ts/upload/ed/5e/b8/8538366274240326978318348ea8af7c.png"
+                  alt=""
+                ></img>
+                Tìm kiếm
               </button>
             </div>
-          </div>
-        )}
-        {this.state.showCheckout && (
-          <Fade right cascade>
-            <div className="cart">
-              <form onSubmit={this.createOrder}>
-                <ul className="form-container">
-                  <li>
-                    <label>Email</label>
-                    <input
-                      name="email"
-                      type="email"
-                      onChange={this.handleInput}
-                      required
-                    ></input>
-                  </li>
-                  <li>
-                    <label>Name</label>
-                    <input
-                      name="name"
-                      type="text"
-                      onChange={this.handleInput}
-                      required
-                    ></input>
-                  </li>
-                  <li>
-                    <label>Phone</label>
-                    <input
-                      name="phone"
-                      type="text"
-                      onChange={this.handleInput}
-                      required
-                    ></input>
-                  </li>
-                  <li>
-                    <label>Address</label>
-                    <input
-                      name="address"
-                      type="text"
-                      onChange={this.handleInput}
-                      required
-                    ></input>
-                  </li>
-                  <li>
-                    <button className="button primary" type="submit">
-                      Checkout
+            {this.state.isLogin ? (
+              <div className="header-account">
+                <img
+                  class="profile-icon"
+                  src="https://salt.tikicdn.com/ts/upload/67/de/1e/90e54b0a7a59948dd910ba50954c702e.png"
+                  alt=""
+                />
+                <span class="header-account-dropdown">
+                  <span>Tài khoản</span>
+                  <span class="account-label">
+                    <span>{this.state.userName.name}</span>
+                    <img
+                      class="arrowIcon"
+                      src="https://salt.tikicdn.com/ts/upload/d7/d4/a8/34939af2da1ceeeae9f95b7485784233.png"
+                      alt=""
+                    ></img>
+                  </span>
+                </span>
+                <Fade top>
+                  <div className="header-account-dropdown-content">
+                    <ul>
+                      <li
+                        onClick={() => {
+                          this.props.history.push("/user");
+                        }}
+                      >
+                        Thông tin tài khoản
+                      </li>
+                      <li
+                        onClick={() => {
+                          this.setState({
+                            isLogin: false,
+                            userName: {},
+                          });
+                          localStorage.removeItem("user");
+                          this.props.cleanCart();
+                        }}
+                      >
+                        Đăng Xuất
+                      </li>
+                    </ul>
+                  </div>
+                </Fade>
+              </div>
+            ) : (
+              <div className="header-account">
+                <img
+                  class="profile-icon"
+                  src="https://salt.tikicdn.com/ts/upload/67/de/1e/90e54b0a7a59948dd910ba50954c702e.png"
+                  alt=""
+                />
+                <span class="header-account-dropdown">
+                  <span>Đăng Nhập / Đăng Ký</span>
+                  <span class="account-label">
+                    <span>Tài khoản</span>
+                    <img
+                      class="arrowIcon"
+                      src="https://salt.tikicdn.com/ts/upload/d7/d4/a8/34939af2da1ceeeae9f95b7485784233.png"
+                      alt=""
+                    ></img>
+                  </span>
+                </span>
+                <Fade top>
+                  <div className="header-account-dropdown-content">
+                    <button
+                      onClick={() => {
+                        this.setState({ showModalLogin: true });
+                      }}
+                    >
+                      Đăng nhập
                     </button>
-                  </li>
-                </ul>
-              </form>
+                    <button
+                      onClick={() => {
+                        this.setState({ showModalSignup: true });
+                      }}
+                    >
+                      Tạo tài khoản
+                    </button>
+                  </div>
+                </Fade>
+              </div>
+            )}
+
+            <div className="header-cart">
+              <a href="/cart">
+                <div className="header-cart-content">
+                  <div className="cart-wrapper">
+                    <img
+                      className="cart-icon"
+                      src="https://salt.tikicdn.com/ts/upload/40/44/6c/b80ad73e5e84aeb71c08e5d8d438eaa1.png"
+                      alt=""
+                    ></img>
+                    <span>{this.props.cartItems.length}</span>
+                  </div>
+                  <span className="cart-text">Giỏ hàng</span>
+                </div>
+              </a>
             </div>
-          </Fade>
-        )}
+          </header>
+          <h2>
+            Giỏ hàng <span>({this.props.cartItems.length} sản phẩm)</span>
+          </h2>
+          <div className="content">
+            <CartProducts></CartProducts>
+            <Checkout
+              isLogin={this.state.isLogin}
+              userName={this.state.userName}
+            ></Checkout>
+          </div>
+          {this.state.showModalSignup && (
+            <Modal isOpen="true" portalClassName="modal modal-signup">
+              <IconButton
+                onClick={() => {
+                  this.setState({ showModalSignup: false });
+                }}
+              >
+                <CloseIcon color="primary"></CloseIcon>
+              </IconButton>
+              <div className="form-wrap">
+                <h1>Đăng ký</h1>
+                <form
+                  className="form-sign-up"
+                  Validate
+                  onSubmit={this.submitSignup}
+                >
+                  <TextField
+                    required
+                    label="Họ và tên"
+                    name="name"
+                    onChange={this.handleInputSignup}
+                  />
+                  <TextField
+                    required
+                    label="UserName"
+                    name="username"
+                    onChange={this.handleInputSignup}
+                  />
+                  <TextField
+                    required
+                    name="password"
+                    label="Password"
+                    type="password"
+                    autoComplete="current-password"
+                    onChange={this.handleInputSignup}
+                  />
+                  <TextField
+                    required
+                    label="Email"
+                    name="email"
+                    type="email"
+                    onChange={this.handleInputSignup}
+                  />
+                  <TextField
+                    required
+                    label="Số điện thoại"
+                    name="phone"
+                    onChange={this.handleInputSignup}
+                  />
+                  <Button type="submit" color="primary" variant="outlined">
+                    Sign Up
+                  </Button>
+                </form>
+                {this.state.alert && (
+                  <Alert severity={this.state.alert.type}>
+                    {this.state.alert.msg}
+                  </Alert>
+                )}
+              </div>
+            </Modal>
+          )}
+          {this.state.showModalLogin && (
+            <Modal isOpen="true" portalClassName="modal modal-login">
+              <IconButton
+                onClick={() => {
+                  this.setState({ showModalLogin: false });
+                }}
+              >
+                <CloseIcon color="primary"></CloseIcon>
+              </IconButton>
+              <div className="form-wrap">
+                <h1>Đăng nhập</h1>
+                <form
+                  className="form-login"
+                  Validate
+                  onSubmit={this.submitLogin}
+                >
+                  <TextField
+                    required
+                    label="UserName"
+                    name="username"
+                    onChange={this.handleInputLogin}
+                  />
+                  <TextField
+                    required
+                    name="password"
+                    label="Password"
+                    type="password"
+                    autoComplete="current-password"
+                    onChange={this.handleInputLogin}
+                  />
+                  <Button type="submit" color="primary" variant="outlined">
+                    Log in
+                  </Button>
+                </form>
+                {this.state.alert && (
+                  <Alert severity={this.state.alert.type}>
+                    {this.state.alert.msg}
+                  </Alert>
+                )}
+              </div>
+            </Modal>
+          )}
+        </div>
       </div>
     );
   }
@@ -158,5 +335,5 @@ export default connect(
   (state) => ({
     cartItems: state.cart.cartItems,
   }),
-  { addProductToCart, removeProductFromCart, addOrder }
+  { cleanCart }
 )(Cart);

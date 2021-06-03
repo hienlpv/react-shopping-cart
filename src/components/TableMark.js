@@ -41,6 +41,7 @@ class TableMark extends Component {
   render() {
     let columns = [
       { field: "number", headerName: "STT", flex: 1 },
+      { field: "type", headerName: "Danh mục", flex: 1 },
       { field: "title", headerName: "Tên thương hiệu", flex: 1 },
       {
         field: "action",

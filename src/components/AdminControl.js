@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import ListItemText from "@material-ui/core/ListItemText";
 import { connect } from "react-redux";
 import { chooseTable } from "../actions/adminControlActions";
 
@@ -14,62 +16,80 @@ class AdminControl extends Component {
   render() {
     return (
       <div className="sidebar">
-        <List component="nav" aria-label="main mailbox folders">
+        <List
+          component="nav"
+          aria-label="main mailbox folders"
+          subheader={
+            <ListSubheader
+              component="div"
+              id="nested-list-subheader"
+              color="primary"
+              style={{
+                background: "rgba(1, 127, 255,0.2)",
+                borderTopLeftRadius: "10px",
+                borderTopRightRadius: "10px",
+                zIndex: "0",
+              }}
+            >
+              MENU LIST
+            </ListSubheader>
+          }
+        >
           <ListItem
             button
+            divider
             selected={this.state.selectedIndex === 0}
             onClick={() => {
               this.props.chooseTable("Product");
               this.setState({ selectedIndex: 0 });
             }}
           >
-            <p>Sản phẩm</p>
+            <ListItemText primary="Sản phẩm" />
           </ListItem>
-          <hr></hr>
           <ListItem
             button
+            divider
             selected={this.state.selectedIndex === 1}
             onClick={() => {
               this.props.chooseTable("Type");
               this.setState({ selectedIndex: 1 });
             }}
           >
-            <p>Danh mục</p>
+            <ListItemText primary="Danh mục" />
           </ListItem>
-          <hr></hr>
           <ListItem
             button
+            divider
             selected={this.state.selectedIndex === 2}
             onClick={() => {
               this.props.chooseTable("Mark");
               this.setState({ selectedIndex: 2 });
             }}
           >
-            <p>Thương hiệu</p>
+            <ListItemText primary="Thương hiệu" />
           </ListItem>
-          <hr></hr>
           <ListItem
             button
+            divider
             selected={this.state.selectedIndex === 3}
             onClick={() => {
               this.props.chooseTable("Color");
               this.setState({ selectedIndex: 3 });
             }}
           >
-            <p>Màu</p>
+            <ListItemText primary="Màu" />
           </ListItem>
-          <hr></hr>
           <ListItem
             button
+            divider
             selected={this.state.selectedIndex === 4}
             onClick={() => {
               this.props.chooseTable("Order");
               this.setState({ selectedIndex: 4 });
             }}
           >
-            <p>Đơn hàng</p>
+            <ListItemText primary="Đơn hàng" />
           </ListItem>
-          <hr></hr>
           <ListItem
             button
             selected={this.state.selectedIndex === 5}
@@ -78,7 +98,7 @@ class AdminControl extends Component {
               this.setState({ selectedIndex: 5 });
             }}
           >
-            <p>Tài khoản</p>
+            <ListItemText primary="Tài khoản" />
           </ListItem>
         </List>
       </div>

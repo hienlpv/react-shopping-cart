@@ -2,9 +2,7 @@ import {
   FETCH_MARK,
   FETCH_COLOR,
   FETCH_TYPE,
-  ADD_ORDER,
   EDIT_ORDER,
-  DELETE_ORDER,
   FETCH_ORDER,
   FETCH_ACCOUNT,
 } from "../types";
@@ -55,37 +53,6 @@ export const fetchOrder = () => (dispatch) => {
         payload: res,
       });
     });
-};
-
-export const addOrder = (data) => async (dispatch) => {
-  let res = await fetch("/api/order", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-  let result = await res.json();
-  if (result) {
-    dispatch({
-      type: ADD_ORDER,
-      payload: result,
-    });
-  }
-};
-
-export const deleteOrder = (id) => async (dispatch) => {
-  let res = await fetch("/api/order/" + id + "", {
-    method: "Delete",
-  });
-  let result = await res.json();
-  if (result) {
-    dispatch({
-      type: DELETE_ORDER,
-      payload: result,
-    });
-  }
 };
 
 export const editOrder = (data) => async (dispatch) => {

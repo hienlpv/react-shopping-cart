@@ -1,8 +1,5 @@
 import {
-  ADD_COLOR,
   CHOOSE_TABLE,
-  DELETE_COLOR,
-  EDIT_COLOR,
   FETCH_COLOR,
   FETCH_MARK,
   FETCH_TYPE,
@@ -20,12 +17,6 @@ export const tableReducers = (state = {}, action) => {
     case FETCH_MARK:
       return { ...state, mark: action.payload };
     case FETCH_COLOR:
-      return { ...state, color: action.payload };
-    case ADD_COLOR:
-      return { ...state, color: action.payload };
-    case DELETE_COLOR:
-      return { ...state, color: action.payload };
-    case EDIT_COLOR:
       return { ...state, color: action.payload };
     case FETCH_TYPE:
       return { ...state, type: action.payload };

@@ -1,4 +1,8 @@
-import { ADD_PRODUCT_TO_CART, REMOVE_PRODUCT_FROM_CART } from "../types";
+import {
+  ADD_PRODUCT_TO_CART,
+  REMOVE_PRODUCT_FROM_CART,
+  CLEAN_CART,
+} from "../types";
 
 export const cartReducers = (
   state = {
@@ -12,6 +16,8 @@ export const cartReducers = (
     case ADD_PRODUCT_TO_CART:
       return { cartItems: action.payload };
     case REMOVE_PRODUCT_FROM_CART:
+      return { cartItems: action.payload };
+    case CLEAN_CART:
       return { cartItems: action.payload };
     default:
       return state;

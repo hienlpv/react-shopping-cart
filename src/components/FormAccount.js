@@ -58,38 +58,28 @@ class FormAccount extends Component {
   };
   updateAccount = (e) => {
     e.preventDefault();
-    fetch(`/api/account/${this.state.dataSignup.username}`)
+    fetch("/api/account/update", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: this.state.dataSignup.id,
+        name: this.state.dataSignup.name,
+        username: this.state.dataSignup.username,
+        password: this.state.dataSignup.password,
+        email: this.state.dataSignup.email,
+        phone: this.state.dataSignup.phone,
+      }),
+    })
       .then((res) => res.json())
       .then((res) => {
-        if (res.type === "warning") {
-          this.setState({
-            alert: res,
-          });
-        } else {
-          fetch("/api/account/update", {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              id: this.state.dataSignup.id,
-              name: this.state.dataSignup.name,
-              username: this.state.dataSignup.username,
-              password: this.state.dataSignup.password,
-              email: this.state.dataSignup.email,
-              phone: this.state.dataSignup.phone,
-            }),
-          })
-            .then((res) => res.json())
-            .then((res) => {
-              this.props.fetchAccount();
-              this.setState({ alert: res });
-              setTimeout(() => {
-                this.setState({ alert: null });
-              }, 1000);
-            });
-        }
+        this.props.fetchAccount();
+        this.setState({ alert: res });
+        setTimeout(() => {
+          this.setState({ alert: null });
+        }, 1000);
       });
   };
   render() {
@@ -154,7 +144,7 @@ class FormAccount extends Component {
             <form
               className="form-sign-up"
               Validate
-              onSubmit={this.submitSignup}
+              onSubmit={this.updateAccount}
             >
               <TextField
                 required

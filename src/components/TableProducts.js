@@ -11,6 +11,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import CloseIcon from "@material-ui/icons/Close";
 import { Alert } from "@material-ui/lab";
+import ProductDetail from "./ProductDetail";
 
 class TableProducts extends Component {
   constructor(props) {
@@ -44,8 +45,17 @@ class TableProducts extends Component {
       { field: "number", headerName: "STT", flex: 0.4 },
       { field: "type", headerName: "Danh mục", flex: 0.6 },
       { field: "title", headerName: "Sản phẩm", flex: 1 },
-      { field: "mark", headerName: "Thương hiệu", flex: 1 },
-      { field: "price", headerName: "Giá", flex: 0.5 },
+      { field: "mark", headerName: "Thương hiệu", flex: 0.7 },
+      {
+        field: "price",
+        headerName: "Giá",
+        flex: 0.8,
+        renderCell: (params) =>
+          params.value.toLocaleString("it-IT", {
+            style: "currency",
+            currency: "VND",
+          }),
+      },
       {
         field: "action",
         headerName: "Chỉnh sửa",
@@ -107,7 +117,7 @@ class TableProducts extends Component {
             className="table"
             rows={rows}
             columns={columns}
-            pageSize={10}
+            pageSize={7}
             autoHeight
           />
         </div>
@@ -136,7 +146,7 @@ class TableProducts extends Component {
           </Modal>
         )}
         {this.state.type === "view" && (
-          <Modal isOpen="true" portalClassName="modal modal-product view">
+          <Modal isOpen="true" portalClassName="modal">
             <IconButton
               onClick={() => {
                 this.setState({ type: "", row: null });
@@ -144,35 +154,10 @@ class TableProducts extends Component {
             >
               <CloseIcon color="primary"></CloseIcon>
             </IconButton>
-            <ul className="product-detail">
-              <li>
-                <span>id</span>
-                {" : "}
-                <span>{this.state.row.id}</span>
-              </li>
-              <li>
-                <span>Tên sản phẩm</span>
-                {" : "}
-                <span>{this.state.row.title}</span>
-              </li>
-              <li>
-                <span>Thương hiệu</span>
-                {" : "}
-                <span>{this.state.row.mark}</span>
-              </li>
-              <li>
-                <span>Mô tả</span>
-                {" : "}
-                <span>{this.state.row.description}</span>
-              </li>
-              {console.log(this.state.row)}
-              {this.state.row.image[0].split(",").map((item, index) => (
-                <li>
-                  <p>{this.state.row.colors[0].split(",")[index]}</p>
-                  <img src={item} alt=""></img>
-                </li>
-              ))}
-            </ul>
+            <ProductDetail
+              product={this.state.row}
+              type="admin"
+            ></ProductDetail>
           </Modal>
         )}
         {this.state.alert && (

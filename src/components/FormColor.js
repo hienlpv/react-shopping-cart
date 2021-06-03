@@ -77,7 +77,7 @@ class FormColor extends Component {
               }}
             >
               <TextField
-                label="Tên danh mục"
+                label="Màu"
                 id="colorTitle"
                 name="colorTitle"
                 value={this.state.colorTitle}

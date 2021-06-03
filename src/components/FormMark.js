@@ -1,19 +1,24 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { TextField, Button } from "@material-ui/core";
+import { TextField, Button, Select, MenuItem } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import { fetchMark } from "../actions/tableActions";
+import { fetchMark, fetchType } from "../actions/tableActions";
+
 class FormMark extends Component {
   constructor(props) {
     super(props);
     this.state = {
       markTitle: this.props.row ? this.props.row.title : "",
+      productType: this.props.row ? this.props.row.type : "",
       alert: null,
     };
   }
+  componentDidMount() {
+    this.props.fetchType();
+  }
   handleInput = (e) => {
     this.setState({
-      markTitle: e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -65,12 +70,31 @@ class FormMark extends Component {
               className="form-mark"
               onSubmit={async (e) => {
                 e.preventDefault();
-                await this.addMark({ title: this.state.markTitle });
+                await this.addMark({
+                  title: this.state.markTitle,
+                  type: this.state.productType,
+                });
                 this.setState({ markTitle: "" });
               }}
             >
+              <Select
+                name="productType"
+                onChange={this.handleInput}
+                displayEmpty
+                value={this.state.productType}
+              >
+                <MenuItem value="" disabled>
+                  Danh mục
+                </MenuItem>
+                {this.props.productType &&
+                  this.props.productType.map((item, index) => (
+                    <MenuItem key={index} value={item.title}>
+                      {item.title}
+                    </MenuItem>
+                  ))}
+              </Select>
               <TextField
-                label="Tên danh mục"
+                label="Tên thương hiệu"
                 id="markTitle"
                 name="markTitle"
                 value={this.state.markTitle}
@@ -98,11 +122,28 @@ class FormMark extends Component {
                 await this.editMark({
                   id: this.props.row.id,
                   title: this.state.markTitle,
+                  type: this.state.productType,
                 });
               }}
             >
+              <Select
+                name="productType"
+                onChange={this.handleInput}
+                displayEmpty
+                value={this.state.productType}
+              >
+                <MenuItem value="" disabled>
+                  Danh mục
+                </MenuItem>
+                {this.props.productType &&
+                  this.props.productType.map((item, index) => (
+                    <MenuItem key={index} value={item.title}>
+                      {item.title}
+                    </MenuItem>
+                  ))}
+              </Select>
               <TextField
-                label="Tên danh mục"
+                label="Tên thương hiệu"
                 id="markTitle"
                 name="markTitle"
                 value={this.state.markTitle}
@@ -125,6 +166,7 @@ class FormMark extends Component {
   }
 }
 
-export default connect(() => ({}), {
+export default connect((state) => ({ productType: state.table.type }), {
   fetchMark,
+  fetchType,
 })(FormMark);

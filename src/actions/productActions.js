@@ -1,9 +1,4 @@
-import {
-  ADD_PRODUCT_TO_CART,
-  FETCH_PRODUCTS,
-  FILTER_PRODUCTS,
-  SORT_PRODUCTS,
-} from "../types";
+import { FETCH_PRODUCTS, FILTER_PRODUCTS } from "../types";
 
 export const fetchProducts = () => (dispatch) => {
   fetch("api/products")
@@ -16,58 +11,34 @@ export const fetchProducts = () => (dispatch) => {
     });
 };
 
-export const filterProducts = (products, size) => (dispatch) => {
+export const filterProducts = (products, filter) => (dispatch) => {
+  let type = filter.type;
+  let mark = filter.mark;
+  console.log(type);
+  if (type.length === 0)
+    dispatch({
+      type: FILTER_PRODUCTS,
+      payload: products,
+    });
+  else if (!mark)
+    dispatch({
+      type: FILTER_PRODUCTS,
+      payload: products.filter((i) => type.includes(i.type)),
+    });
+  else
+    dispatch({
+      type: FILTER_PRODUCTS,
+      payload: products.filter((i) => type.includes(i.type) && i.mark === mark),
+    });
+};
+
+export const searchProducts = (products, keyword) => (dispatch) => {
+  let newProducts = products.slice();
+  newProducts = newProducts.filter((i) =>
+    i.title.toUpperCase().includes(keyword.toUpperCase())
+  );
   dispatch({
     type: FILTER_PRODUCTS,
-    payload: {
-      size: size,
-      items:
-        size === ""
-          ? products
-          : products.filter((x) => x.availableSizes.indexOf(size) >= 0),
-    },
-  });
-};
-
-export const sortProducts = (products, sort) => (dispatch) => {
-  console.log(products);
-  const sortedItems = products.slice();
-  dispatch({
-    type: SORT_PRODUCTS,
-    payload: {
-      sort: sort,
-      items: sortedItems.sort((a, b) =>
-        sort === "lowest"
-          ? a.price > b.price
-            ? 1
-            : -1
-          : sort === "highest"
-          ? a.price < b.price
-            ? 1
-            : -1
-          : a._id > b._id
-          ? 1
-          : -1
-      ),
-    },
-  });
-};
-
-export const addProductToCart = (cartItems, product) => (dispatch) => {
-  const new_cartItems = cartItems.slice();
-  let alreadyInCart = false;
-  new_cartItems.forEach((item) => {
-    if (item._id === product._id) {
-      item.count++;
-      alreadyInCart = true;
-    }
-  });
-  if (!alreadyInCart) {
-    new_cartItems.push({ ...product, count: 1 });
-    localStorage.setItem("cartItems", JSON.stringify(new_cartItems));
-  }
-  dispatch({
-    type: ADD_PRODUCT_TO_CART,
-    payload: new_cartItems,
+    payload: newProducts,
   });
 };

@@ -71,12 +71,76 @@ app.post("/api/account", async (req, res) => {
   });
 });
 
-app.post("/api/account/update", async (req, res) => {
+app.post("/api/account/login", async (req, res) => {
+  let data = Object.assign(req.body);
   try {
-    await User.findByIdAndUpdate(req.body.id, req.body);
-    res.json({ type: "success", msg: "Cập nhật thành công" });
+    const user = await User.find({ username: data.username });
+    bcrypt.compare(data.password, user[0].password, function (err, result) {
+      if (result)
+        res.json({
+          type: "success",
+          msg: user[0],
+        });
+      else
+        res.json({
+          type: "warning",
+          msg: "Mật khẩu không đúng",
+        });
+    });
   } catch (err) {
-    res.json({ type: "err", msg: err });
+    res.json({ type: "error", msg: "Tên đăng nhập không tồn tại" });
+  }
+});
+
+app.post("/api/account/update", async (req, res) => {
+  let data = Object.assign(req.body);
+  let user = await User.find({ username: data.username });
+  if (data.oldpassword) {
+    try {
+      bcrypt.compare(
+        data.oldpassword,
+        user[0].password,
+        async function (err, result) {
+          if (result) {
+            bcrypt.genSalt(10, (err, salt) => {
+              bcrypt.hash(data.newpassword, salt, async (err, salt) => {
+                data.newpassword = salt;
+                await User.findByIdAndUpdate(data.id, {
+                  name: data.name,
+                  password: data.newpassword,
+                  email: data.email,
+                  phone: data.phone,
+                });
+                user = await User.find({ username: data.username });
+                res.json({
+                  type: "success",
+                  msg: "Cập nhật thành công",
+                  user: user[0],
+                });
+              });
+            });
+          } else
+            res.json({
+              type: "warning",
+              msg: "Mật khẩu cũ không đúng",
+            });
+        }
+      );
+    } catch (err) {
+      res.json({ type: "err", msg: err.message });
+    }
+  } else {
+    try {
+      await User.findByIdAndUpdate(data.id, {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+      });
+      user = await User.find({ username: data.username });
+      res.json({ type: "success", msg: "Cập nhật thành công", user: user[0] });
+    } catch (err) {
+      res.json({ type: "err", msg: err });
+    }
   }
 });
 
@@ -188,6 +252,7 @@ const Mark = mongoose.model(
   "mark",
   new mongoose.Schema({
     _id: { type: String, default: shortid.generate },
+    type: String,
     title: String,
   })
 );
@@ -342,11 +407,10 @@ const Order = mongoose.model(
   "order",
   new mongoose.Schema({
     _id: { type: String, default: shortid.generate },
-    name: String,
-    email: String,
-    phone: String,
+    username: String,
     address: String,
-    products: [String],
+    products: [Object],
+    total: Number,
   })
 );
 
@@ -360,10 +424,20 @@ app.get("/api/order", async (reg, res) => {
 });
 
 app.post("/api/order", async (req, res) => {
-  const newOrder = new Order(req.body);
-  await newOrder.save();
-  const order = await Order.find({});
-  res.send(order);
+  let data = req.body;
+  if (!data.username)
+    res.json({ type: "warning", msg: "Vui lòng đăng nhập trước" });
+  else if (data.address === "") {
+    res.json({ type: "warning", msg: "Vui lòng nhập địa chỉ" });
+  } else {
+    try {
+      const newOrder = new Order(req.body);
+      await newOrder.save();
+      res.json({ type: "success", msg: "Thanh toán thành công" });
+    } catch (err) {
+      res.json({ type: "error", msg: err.message });
+    }
+  }
 });
 
 app.post("/api/order/update", async (req, res) => {
@@ -373,9 +447,12 @@ app.post("/api/order/update", async (req, res) => {
 });
 
 app.delete("/api/order/:id", async (req, res) => {
-  await Order.findByIdAndDelete(req.params.id);
-  const order = await Order.find({});
-  res.send(order);
+  try {
+    await Order.findByIdAndDelete(req.params.id);
+    res.json({ type: "success", msg: `Đã xoá đơn hàng ${req.params.id}` });
+  } catch (err) {
+    res.json({ type: "error", msg: err.message });
+  }
 });
 
 app.delete("/api/type/", async (req, res) => {

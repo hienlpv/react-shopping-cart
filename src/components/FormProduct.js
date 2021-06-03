@@ -14,9 +14,9 @@ class FormProduct extends Component {
       productTitle: this.props.row ? this.props.row.title : "",
       productType: this.props.row ? this.props.row.type : "",
       productMark: this.props.row ? this.props.row.mark : "",
-      productImage: this.props.row ? this.props.row.image[0].split(",") : [],
+      productImage: this.props.row ? this.props.row.image : [],
       productDesc: this.props.row ? this.props.row.description : "",
-      productColor: this.props.row ? this.props.row.colors[0].split(",") : [],
+      productColor: this.props.row ? this.props.row.colors : [],
       productPrice: this.props.row ? this.props.row.price : "0",
       files: [],
       res: false,
@@ -28,7 +28,6 @@ class FormProduct extends Component {
     this.props.fetchMark();
     this.props.fetchColor();
     this.props.fetchType();
-    console.log(this.props.color);
   }
 
   addProducts = async (data) => {
@@ -38,10 +37,14 @@ class FormProduct extends Component {
     });
     formData.append("title", data.productTitle);
     formData.append("type", data.productType);
-    formData.append("image", data.productImage);
+    data.productImage.forEach((i) => {
+      formData.append("image", i);
+    });
     formData.append("mark", data.productMark);
     formData.append("description", data.productDesc);
-    formData.append("colors", data.productColor);
+    data.productColor.forEach((i) => {
+      formData.append("colors", i);
+    });
     formData.append("price", data.productPrice);
 
     try {
@@ -60,16 +63,20 @@ class FormProduct extends Component {
 
   editProducts = async (data) => {
     var formData = new FormData();
+    formData.append("id", data.id);
     data.files.forEach((item) => {
       formData.append(Object.keys(item)[0], item[Object.keys(item)[0]]);
     });
-    formData.append("id", data.id);
     formData.append("title", data.productTitle);
     formData.append("type", data.productType);
-    formData.append("image", data.productImage);
+    data.productImage.forEach((i) => {
+      formData.append("image", i);
+    });
     formData.append("mark", data.productMark);
     formData.append("description", data.productDesc);
-    formData.append("colors", data.productColor);
+    data.productColor.forEach((i) => {
+      formData.append("colors", i);
+    });
     formData.append("price", data.productPrice);
 
     try {
@@ -194,6 +201,7 @@ class FormProduct extends Component {
     };
     await this.editProducts(data);
   };
+
   render() {
     switch (this.props.type) {
       case "add":
@@ -234,11 +242,13 @@ class FormProduct extends Component {
                   <MenuItem value="" disabled>
                     Thương hiệu
                   </MenuItem>
-                  {this.props.mark.map((item, index) => (
-                    <MenuItem key={index} value={item.title}>
-                      {item.title}
-                    </MenuItem>
-                  ))}
+                  {this.props.mark
+                    .filter((item) => item.type === this.state.productType)
+                    .map((item, index) => (
+                      <MenuItem key={index} value={item.title}>
+                        {item.title}
+                      </MenuItem>
+                    ))}
                 </Select>
               )}
               <TextField
@@ -344,11 +354,13 @@ class FormProduct extends Component {
                   <MenuItem value="" disabled>
                     Thương hiệu
                   </MenuItem>
-                  {this.props.mark.map((item, index) => (
-                    <MenuItem key={index} value={item.title}>
-                      {item.title}
-                    </MenuItem>
-                  ))}
+                  {this.props.mark
+                    .filter((item) => item.type === this.state.productType)
+                    .map((item, index) => (
+                      <MenuItem key={index} value={item.title}>
+                        {item.title}
+                      </MenuItem>
+                    ))}
                 </Select>
               )}
               <TextField
