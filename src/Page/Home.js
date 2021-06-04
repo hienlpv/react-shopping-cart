@@ -32,8 +32,11 @@ class Home extends React.Component {
       .then((res) => {
         if (res.type === "warning") {
           this.setState({
-            signupNoti: res,
+            alert: res,
           });
+          setTimeout(() => {
+            this.setState({ alert: null });
+          }, 1000);
         } else {
           fetch("/api/account", {
             method: "POST",
